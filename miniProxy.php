@@ -16,6 +16,10 @@ $whitelistPatterns = array(
   //Usage example: To support any URL at example.net, including sub-domains, uncomment the
   //line below (which is equivalent to [ @^https?://([a-z0-9-]+\.)*example\.net@i ]):
   //getHostnamePattern("example.net")
+  getHostnamePattern("google.com"),
+  getHostnamePattern("wikiwand.com"),
+  getHostnamePattern("wikipedia.org"),
+  getHostnamePattern("sci-hub")
 );
 
 //To enable CORS (cross-origin resource sharing) for proxied sites, set $forceCORS to true.
@@ -32,7 +36,7 @@ $startURL = "";
 //When no $startURL is configured above, miniProxy will show its own landing page with a URL form field
 //and the configured example URL. The example URL appears in the instructional text on the miniProxy landing page,
 //and is proxied when pressing the 'Proxy It!' button on the landing page if its URL form is left blank.
-$landingExampleURL = "https://example.net";
+$landingExampleURL = "https://sci-hub.tw/";
 
 /****************************** END CONFIGURATION ******************************/
 
@@ -94,7 +98,8 @@ $prefixPort = $usingDefaultPort ? "" : ":" . $_SERVER["SERVER_PORT"];
 $prefixHost = $_SERVER["HTTP_HOST"];
 $prefixHost = strpos($prefixHost, ":") ? implode(":", explode(":", $_SERVER["HTTP_HOST"], -1)) : $prefixHost;
 
-define("PROXY_PREFIX", "http" . (isset($_SERVER["HTTPS"]) ? "s" : "") . "://" . $prefixHost . $prefixPort . $_SERVER["SCRIPT_NAME"] . "?");
+//define("PROXY_PREFIX", "http" . (isset($_SERVER["HTTPS"]) ? "s" : "") . "://" . $prefixHost . $prefixPort . $_SERVER["SCRIPT_NAME"] . "?");
+define("PROXY_PREFIX", "http" . (isset($_SERVER["HTTPS"]) ? "s" : "") . "://" . "lroel.work/proxy/" . "?");
 
 //Makes an HTTP request via cURL, using request data that was passed directly to this script.
 function makeRequest($url) {
@@ -276,7 +281,7 @@ if (isset($_POST["miniProxyFormAction"])) {
 }
 if (empty($url)) {
     if (empty($startURL)) {
-      die("<html><head><title>miniProxy</title></head><body><h1>Welcome to miniProxy!</h1>miniProxy can be directly invoked like this: <a href=\"" . PROXY_PREFIX . $landingExampleURL . "\">" . PROXY_PREFIX . $landingExampleURL . "</a><br /><br />Or, you can simply enter a URL below:<br /><br /><form onsubmit=\"if (document.getElementById('site').value) { window.location.href='" . PROXY_PREFIX . "' + document.getElementById('site').value; return false; } else { window.location.href='" . PROXY_PREFIX . $landingExampleURL . "'; return false; }\" autocomplete=\"off\"><input id=\"site\" type=\"text\" size=\"50\" /><input type=\"submit\" value=\"Proxy It!\" /></form></body></html>");
+      die("<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><title>miniProxy</title></head><body><h1>Welcome to miniProxy!</h1>miniProxy can be directly invoked like this: <a href=\"" . PROXY_PREFIX . $landingExampleURL . "\">" . PROXY_PREFIX . $landingExampleURL . "</a><br /><br />Or, you can simply enter a URL below:<br /><br /><form onsubmit=\"if (document.getElementById('site').value) { window.location.href='" . PROXY_PREFIX . "' + document.getElementById('site').value; return false; } else { window.location.href='" . PROXY_PREFIX . $landingExampleURL . "'; return false; }\" autocomplete=\"off\"><input id=\"site\" type=\"text\" size=\"50\" /><input type=\"submit\" value=\"Proxy It!\" /></form></body></html>");
     } else {
       $url = $startURL;
     }
@@ -305,7 +310,9 @@ foreach ($whitelistPatterns as $pattern) {
   }
 }
 if (!$urlIsValid) {
-  die("Error: The requested URL was disallowed by the server administrator.");
+  //die("Error: The requested URL was disallowed by the server administrator.");
+  header("Location: " . $url, true);
+  exit(0);
 }
 
 $response = makeRequest($url);
